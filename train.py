@@ -13,15 +13,13 @@ from utils import *
 NB_EPOCH = 200
 PATIENCE = 30  # early stopping patience
 
-# config filters
+# Config filters
 FILTER.localpool = {'sym_norm':True}
 FILTER.chebyshev = {'max_degree': 2, 'sym_norm':True}
 
-# Get data
+# Get data and biuld model
 # X:features  A:graph  y:labels
 X_train, X_test, y_train, y_test = load_from_csv('train.csv', 'test.csv', normalized=True)
-
-# Compile model
 A = make_adj(X_train, X_test)
 model = GCN.from_data(X_train, y_train, X_test, adj_matrix=A, filter=FILTER.localpool)
 

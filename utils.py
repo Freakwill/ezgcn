@@ -8,6 +8,7 @@ from keras.utils import to_categorical
 from scipy.sparse.linalg.eigen.arpack import eigsh, ArpackNoConvergence
 import scipy.stats
 
+VERBOSE = True
 
 def encode_onehot(labels):
     classes = set(labels)
@@ -78,10 +79,12 @@ def normalized_laplacian(adj, symmetric=True):
 
 def rescale_laplacian(laplacian):
     try:
-        print('Calculating largest eigenvalue of normalized graph Laplacian...')
+        if VERBOSE:
+            print('Calculating largest eigenvalue of normalized graph Laplacian...')
         largest_eigval = eigsh(laplacian, 1, which='LM', return_eigenvectors=False)[0]
     except ArpackNoConvergence:
-        print('Eigenvalue calculation did not converge! Using largest_eigval=2 instead.')
+        if VERBOSE:
+            print('Eigenvalue calculation did not converge! Using largest_eigval=2 instead.')
         largest_eigval = 2
 
     scaled_laplacian = (2. / largest_eigval) * laplacian - sp.eye(laplacian.shape[0])
@@ -90,7 +93,8 @@ def rescale_laplacian(laplacian):
 
 def chebyshev_polynomial(X, k):
     """Calculate Chebyshev polynomials up to order k. Return a list of sparse matrices."""
-    print("Calculating Chebyshev polynomials up to order {}...".format(k))
+    if VERBOSE:
+        print("Calculating Chebyshev polynomials up to order {}...".format(k))
 
     T_k = [sp.eye(X.shape[0]).tocsr(), X]
 
@@ -105,11 +109,11 @@ def chebyshev_polynomial(X, k):
 
 
 # extended by William
-def load_from_csv(train_path="train.csv", test_path="test.csv", normalized=False):
-    X_y = np.genfromtxt(train_path, delimiter=',')
+def load_from_csv(train_path="train.csv", test_path="test.csv", normalized=False, *args, **kwargs):
+    X_y = np.genfromtxt(train_path, delimiter=',', *args, **kwargs)
     X_train = X_y[:, :-1]
     y_train = encode_onehot(X_y[:, -1])
-    X_y = np.genfromtxt(test_path, delimiter=',')
+    X_y = np.genfromtxt(test_path, delimiter=',', *args, **kwargs)
     X_test = X_y[:, :-1]
     y_test = encode_onehot(X_y[:, -1])
     if normalized:

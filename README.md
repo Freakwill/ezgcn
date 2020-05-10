@@ -5,9 +5,6 @@
 #!/usr/bin/env python3
 
 from keras.optimizers import Adam
-from keras.utils import plot_model
-from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
-
 
 from graph import *
 from utils import *
@@ -22,11 +19,10 @@ FILTER.localpool = {'sym_norm':True}
 FILTER.chebyshev = {'max_degree': 2, 'sym_norm':True}
 
 # Get data
-# X:features  A:graph  y:labels
+# X:features y:labels A:graph  
 X_train, X_test, y_train, y_test = load_from_csv('train.csv', 'test.csv', normalized=True)
-
-# Compile model
 A = make_adj(X_train, X_test)
+
 model = GCN.from_data(X_train, y_train, X_test, adj_matrix=A, filter=FILTER.localpool)
 
 # Callbacks for EarlyStopping

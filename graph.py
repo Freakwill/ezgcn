@@ -138,26 +138,31 @@ class GCN(Model):
 
 
     @classmethod
-    def from_data(cls, X_train, y_train, X_test=None, *args, **kwargs):
+    def from_data(cls, X_train, y_train, X_test=None, adj_matrix=None, similarity=None, *args, **kwargs):
         input_dim = X_train.shape[1]
         output_dim = y_train.shape[1]
         model = cls(input_dim, output_dim, *args, **kwargs)
         if X_test is not None:
-            model.make_graph(X_train, X_test)
+            model.make_graph(X_train, X_test, adj_matrix=adj_matrix, similarity=similarity)
         return model
 
-    def make_graph(self, X_train, X_test, A=None):
-        if A is None:
-            A = self.adj_matrix
+    def make_graph(self, X_train, X_test, adj_matrix=None, similarity=None):
+        if adj_matrix is not None:
+            self.adj_matrix = adj_matrix
+        elif similarity is not None:
+            self.adj_matrix = make_adj(X_train, X_test, similarity=cosine)
+        elif not hasattr(self, 'adj_matrix'):
+            raise Exception('Plz supply adj_matrix!')
+
         X = np.vstack((X_train, X_test))
         if self.filter == FILTER.localpool:
             # Local pooling filters (see 'renormalization trick' in Kipf & Welling, arXiv 2016)
-            A_ = preprocess_adj(A, self.filter['sym_norm'])
+            A_ = preprocess_adj(self.adj_matrix, self.filter['sym_norm'])
             self.graph = [X, A_.todense()]
 
         elif self.filter == FILTER.chebyshev:
             # Chebyshev polynomial basis filters (Defferard et al., NIPS 2016)
-            L = normalized_laplacian(A, self.filter['sym_norm'])
+            L = normalized_laplacian(self.adj_matrix, self.filter['sym_norm'])
             L_scaled = rescale_laplacian(L)
             T_k = chebyshev_polynomial(L_scaled, self.filter['max_degree'])
             self.graph = [X]+T_k
@@ -165,10 +170,10 @@ class GCN(Model):
         self.adj_size = X.shape[0]
 
 
-    def fit(self, X_train, y_train, X_test=None, val_rate=0.2, *args, **kwargs):
+    def fit(self, X_train, y_train, X_test=None, adj_matrix=None, similarity=None, val_rate=0.2, *args, **kwargs):
         if not hasattr(self, 'graph'):
             if X_test is not None:
-                self.make_graph(X_train, X_test)
+                self.make_graph(X_train, X_test, adj_matrix=adj_matrix, similarity=similarity)
             else:
                 raise Exception('run make_graph method before fitting!')
 

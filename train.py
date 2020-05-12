@@ -28,8 +28,10 @@ SIMILARITY = cosine
 ## Get data and biuld model
 ## X:features  A:graph  y:labels
 X_train, X_test, y_train, y_test = load_from_csv('train.csv', 'test.csv', normalized=True)
-A = make_adj(X_train, X_test, similarity=SIMILARITY)
-model = GCN.from_data(X_train, y_train, X_test, adj_matrix=A, filter=FILTER.localpool)
+model = GCN.from_data(X_train, y_train, X_test, similarity=SIMILARITY, filter=FILTER.localpool)
+
+# A = make_adj(X_train, X_test, similarity=SIMILARITY)
+# model = GCN.from_data(X_train, y_train, X_test, adj_matrix=A, filter=FILTER.localpool)
 
 ## Callbacks for EarlyStopping
 es_callback = EarlyStopping(monitor='val_weighted_acc', patience=PATIENCE)

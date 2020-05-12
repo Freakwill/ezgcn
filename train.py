@@ -14,6 +14,7 @@ from utils import *
 ## Define parameters
 NB_EPOCH = 300
 PATIENCE = 30  # early stopping patience
+VAL_RATE = 0.2
 
 ## Config filters
 FILTER.localpool = {'sym_norm':True}
@@ -36,7 +37,7 @@ es_callback = EarlyStopping(monitor='val_weighted_acc', patience=PATIENCE)
 ## Train
 model.compile(loss='categorical_crossentropy',
               optimizer=Adam(lr=0.01), weighted_metrics=['acc'])
-model.fit(X_train, y_train,
+model.fit(X_train, y_train, val_rate=VAL_RATE,
           epochs=NB_EPOCH, verbose=1,
           shuffle=False, callbacks=[es_callback])
 

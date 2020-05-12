@@ -73,9 +73,7 @@ class GraphConvolution(Layer):
         features = inputs[0]
         basis = inputs[1:]
 
-        supports = list()
-        for i in range(self.support):
-            supports.append(K.dot(basis[i], features))
+        supports = [K.dot(basis[i], features) for i in range(self.support)]
         supports = K.concatenate(supports, axis=1)
         output = K.dot(supports, self.kernel)
 
@@ -167,7 +165,7 @@ class GCN(Model):
         self.adj_size = X.shape[0]
 
 
-    def fit(self, X_train, y_train, X_test=None, val_rate=0.1, *args, **kwargs):
+    def fit(self, X_train, y_train, X_test=None, val_rate=0.2, *args, **kwargs):
         if not hasattr(self, 'graph'):
             if X_test is not None:
                 self.make_graph(X_train, X_test)
@@ -181,8 +179,7 @@ class GCN(Model):
         val_mask = np.hstack((mask, np.zeros(NX_, dtype=np.bool)))
         train_mask = np.hstack((1-mask, np.zeros(NX_, dtype=np.bool)))
         self.batch_size = self.adj_matrix.shape[0]
-        
-        y_train = np.vstack((y_train, np.zeros((NX_, Ny), dtype=np.bool)))
+        y_train = np.vstack((y_train, np.zeros((NX_, Ny), dtype=np.int32)))
         validation_data = (self.graph, y_train, val_mask)
 
         super(GCN, self).fit(self.graph, y_train, sample_weight=train_mask,
@@ -199,7 +196,6 @@ class GCN(Model):
                               batch_size=self.batch_size)
 
 
-    def predict(self, X=None):
-        return super(GCN, self).predict(self.graph, batch_size=self.batch_size)
-
+    def predict(self, X=None, *args, **kwargs):
+        return super(GCN, self).predict(self.graph, batch_size=self.batch_size, *args, **kwargs)
 

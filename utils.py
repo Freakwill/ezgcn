@@ -3,19 +3,21 @@
 import scipy.sparse as sp
 import numpy as np
 import numpy.linalg as LA
-from sklearn import preprocessing
+from sklearn.preprocessing import *
 from keras.utils import to_categorical
 from scipy.sparse.linalg.eigen.arpack import eigsh, ArpackNoConvergence
 import scipy.stats
 
 VERBOSE = True
 
-def encode_onehot(labels):
-    classes = set(labels)
-    classes_dict = {c: np.identity(len(classes))[i, :] for i, c in enumerate(classes)}
-    labels_onehot = np.array(list(map(classes_dict.get, labels)), dtype=np.int32)
-    return labels_onehot
+_enc = OneHotEncoder(handle_unknown='ignore', dtype=np.int32)
 
+def encode_onehot(labels):
+    if labels.ndim == 1:
+        labels = labels.reshape(-1, 1)
+    return _enc.fit_transform(labels).toarray()
+
+decode_onehot = _enc.inverse_transform
 
 #     # build graph
 #     import networkx as nx
@@ -49,26 +51,6 @@ def preprocess_adj(adj, symmetric=True):
 def random_mask(p, l):
     b = scipy.stats.bernoulli(p)
     return b.rvs(l).astype(np.bool)
-
-
-# def get_splits(y):
-#     idx_train = range(140)
-#     idx_val = range(200, 500)
-#     idx_test = range(500, 1500)
-    
-#     y_train = np.zeros(y.shape, dtype=np.int32) #y:label
-#     y_val = np.zeros(y.shape, dtype=np.int32)
-#     y_test = np.zeros(y.shape, dtype=np.int32)
-
-#     y_train[idx_train] = y[idx_train]
-#     y_val[idx_val] = y[idx_val]
-#     y_test[idx_test] = y[idx_test]
-
-#     train_mask = sample_mask(idx_train, y.shape[0])
-#     val_mask = sample_mask(idx_val, y.shape[0])
-#     test_mask = sample_mask(idx_test, y.shape[0])
-
-#     return y_train, y_val, y_test, train_mask,val_mask,test_mask
 
 
 def normalized_laplacian(adj, symmetric=True):
@@ -125,6 +107,7 @@ def load_from_csv(train_path="train.csv", test_path="test.csv", normalized=False
 # similarity: (x1, x2) |-> [0,1]
 # x1==x2 -> 1
 def cosine(x1, x2):
+    # cosine similarity
     return np.dot(x1, x2)/LA.norm(x1)*LA.norm(x2)
 
 def hamming(x1, x2):

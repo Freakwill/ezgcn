@@ -156,7 +156,7 @@ class GCN(Model):
         if self.filter == localpool:
             # Local pooling filters (see 'renormalization trick' in Kipf & Welling, arXiv 2016)
             A_ = preprocess_adj(self.adj_matrix, self.filter['sym_norm'])
-            self.graph = [X, A_.todense()]
+            self.graph = [X, A_]
 
         elif self.filter == chebyshev:
             # Chebyshev polynomial basis filters (Defferard et al., NIPS 2016)
@@ -192,7 +192,7 @@ class GCN(Model):
     def ezfit(self, X, y, X_test):
         pass
 
-    def valuate(self, X, y):
+    def evaluate(self, X, y):
         NX_ = X_test.shape[0]
         test_mask = np.hstack((np.zeros(self.adj_size-NX_), np.ones(NX_)))
         eval_results = model.evaluate(self.graph, y, sample_weight=test_mask,

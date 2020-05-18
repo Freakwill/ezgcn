@@ -46,11 +46,19 @@ model.fit(X_train, y_train, val_rate=VAL_RATE,
 ## Evaluate model on the test data
 eval_results = model.evaluate(X_test, y_test)
 print('''
-      ========
+      ================
       Test loss: {}
       Test accuracy: {}
-      ========
+      =================
       '''.format(*eval_results))
 
-preds = model.predict()
-np.savetxt('test-pred.csv', np.column_stack((y_test, decode_onehot(preds))),fmt='%d',delimiter=',')
+y_pred = model.predict()
+y_pred = decode_onehot(y_pred).ravel()
+print('''
+    target    predict
+    -----------------
+    ''')
+for y, yp in zip(y_test, y_pred):
+    print(f'{y}    {yp}')
+
+np.savetxt('test-pred.csv', np.column_stack((y_test, y_pred)),fmt='%d',delimiter=',')

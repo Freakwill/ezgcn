@@ -108,7 +108,7 @@ def load_from_csv(train_path="train.csv", test_path="test.csv", normalized=False
 # x1==x2 -> 1
 def cosine(x1, x2):
     # cosine similarity
-    return np.dot(x1, x2)/LA.norm(x1)*LA.norm(x2)
+    return np.dot(x1, x2) / LA.norm(x1) * LA.norm(x2)
 
 def hamming(x1, x2):
     return np.mean(x1==x2)

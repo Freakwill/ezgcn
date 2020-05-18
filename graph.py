@@ -106,19 +106,17 @@ class GraphConvolution(Layer):
         return c
 
 
-from types import SimpleNamespace
-FILTER = SimpleNamespace()
-FILTER.localpool = {'sym_norm':True}
-FILTER.chebyshev = {'max_degree': 2, 'sym_norm':True}
+localpool = {'sym_norm':True}
+chebyshev = {'max_degree': 2, 'sym_norm':True}
 
 class GCN(Model):
-    def __init__(self, input_dim, output_dim, adj_matrix=None, filter=FILTER.localpool):
-        if filter == FILTER.localpool:
+    def __init__(self, input_dim, output_dim, adj_matrix=None, filter=localpool):
+        if filter == localpool:
             # Local pooling filters (see 'renormalization trick' in Kipf & Welling, arXiv 2016)
             support = 1
             G = [Input(shape=(None, None), batch_shape=(None, None), sparse=True)]
 
-        elif filter == FILTER.chebyshev:
+        elif filter == chebyshev:
             # Chebyshev polynomial basis filters (Defferard et al., NIPS 2016)
             support = MAX_DEGREE + 1
             G = [Input(shape=(None, None), batch_shape=(None, None), sparse=True)
@@ -155,12 +153,12 @@ class GCN(Model):
             raise Exception('Plz supply adj_matrix!')
 
         X = np.vstack((X_train, X_test))
-        if self.filter == FILTER.localpool:
+        if self.filter == localpool:
             # Local pooling filters (see 'renormalization trick' in Kipf & Welling, arXiv 2016)
             A_ = preprocess_adj(self.adj_matrix, self.filter['sym_norm'])
             self.graph = [X, A_.todense()]
 
-        elif self.filter == FILTER.chebyshev:
+        elif self.filter == chebyshev:
             # Chebyshev polynomial basis filters (Defferard et al., NIPS 2016)
             L = normalized_laplacian(self.adj_matrix, self.filter['sym_norm'])
             L_scaled = rescale_laplacian(L)

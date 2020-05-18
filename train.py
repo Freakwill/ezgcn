@@ -17,8 +17,8 @@ PATIENCE = 30  # early stopping patience
 VAL_RATE = 0.2
 
 ## Config filters
-FILTER.localpool = {'sym_norm':True}
-FILTER.chebyshev = {'max_degree': 2, 'sym_norm':True}
+localpool = {'sym_norm':True}
+chebyshev = {'max_degree': 2, 'sym_norm':True}
 
 ## Select similarity
 SIMILARITY = cosine
@@ -28,7 +28,7 @@ SIMILARITY = cosine
 ## Get data and biuld model
 ## X:features  A:graph  y:labels
 X_train, X_test, y_train, y_test = load_from_csv('train.csv', 'test.csv', normalized=True)
-model = GCN.from_data(X_train, y_train, X_test, similarity=SIMILARITY, filter=FILTER.localpool)
+model = GCN.from_data(X_train, y_train, X_test, similarity=SIMILARITY, filter=localpool)
 
 # A = make_adj(X_train, X_test, similarity=SIMILARITY)
 # model = GCN.from_data(X_train, y_train, X_test, adj_matrix=A, filter=FILTER.localpool)

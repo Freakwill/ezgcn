@@ -193,7 +193,7 @@ class GCN(Model):
         pass
 
     def evaluate(self, X, y):
-        NX_ = X_test.shape[0]
+        NX_ = X.shape[0]
         test_mask = np.hstack((np.zeros(self.adj_size-NX_), np.ones(NX_)))
         eval_results = model.evaluate(self.graph, y, sample_weight=test_mask,
                               batch_size=self.batch_size)
